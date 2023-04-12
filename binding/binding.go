@@ -545,6 +545,8 @@ type (
 		Form string
 
 		// TimeFormat specifies the time format for time.Time fields.
+		// Use time.DateOnly for DateOnly
+		// https://pkg.go.dev/time#pkg-constants
 		TimeFormat string
 
 		// Binder is a function that converts the incoming request value(s)
