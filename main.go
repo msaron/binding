@@ -46,3 +46,14 @@ func run1() {
 		fmt.Printf("%+v\n", user)
 	}
 }
+
+func run2() {
+	t := "1959-11-23 15:04"
+	tf := time.DateOnly
+	v, err := time.Parse(tf, t)
+	if err != nil {
+		log.Fatal(err)
+	} else {
+		fmt.Println(v)
+	}
+}
