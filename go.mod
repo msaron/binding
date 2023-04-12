@@ -1,4 +1,4 @@
-module binding
+module test-binding
 
 go 1.20
 
