@@ -25,12 +25,12 @@ type Model struct {
 func (m *Model) FieldMap(req *http.Request) FieldMap {
 	return FieldMap{
 		&m.Foo: Field{
-			Form:     "foo",
-			Required: true,
+			Form: "foo",
+			// Required: true,
 		},
 		&m.Bar: Field{
-			Form:     "bar",
-			Required: true,
+			Form: "bar",
+			// Required: true,
 		},
 		&m.Baz:   "baz",
 		&m.Child: "child",

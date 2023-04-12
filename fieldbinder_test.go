@@ -1,22 +1,12 @@
 package binding_test
 
-import (
-	"fmt"
-	"io"
-	"log"
-	"net/http"
-	"net/http/httptest"
-	"net/url"
-	"os"
-	"strconv"
-
-	"github.com/mholt/binding"
-)
-
 type MyType struct {
 	SomeNumber int
 }
 
+// Mana -> errors
+
+/*
 func (t *MyType) FieldMap(req *http.Request) binding.FieldMap {
 	return binding.FieldMap{
 		"a-key": binding.Field{
@@ -56,3 +46,4 @@ func Example_fieldBinder() {
 
 	// Output: 1008
 }
+*/

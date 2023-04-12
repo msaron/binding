@@ -44,7 +44,6 @@ func Bind(req *http.Request, userStruct FieldMapper) error {
 
 	if contentType == "" {
 		errs.Add([]string{}, ContentTypeError, "Empty Content-Type")
-		errs = validate(errs, req, userStruct)
 	} else {
 		errs.Add([]string{}, ContentTypeError, "Unsupported Content-Type")
 	}
@@ -159,256 +158,13 @@ func defaultJsonBinder(req *http.Request, userStruct FieldMapper) Errors {
 		return errs
 	}
 
-	errs = validate(errs, req, userStruct)
-	if len(errs) > 0 {
-		return errs
-	}
-
-	return nil
-}
-
-// Validate ensures that all conditions have been met on every field in the
-// populated struct. Validation should occur after the request has been
-// deserialized into the struct.
-func Validate(req *http.Request, userStruct FieldMapper) error {
-	err := validate(Errors{}, req, userStruct)
-	if len(err) > 0 {
-		return err
-	}
-
-	return nil
-}
-
-func validate(errs Errors, req *http.Request, userStruct FieldMapper) Errors {
-	fm := userStruct.FieldMap(req)
-
-	for fieldPointer, fieldNameOrSpec := range fm {
-		fieldSpec, err := fieldSpecification(fieldNameOrSpec)
-		if err != nil {
-			continue
-		}
-
-		addRequiredError := func() {
-			errorMsg := "Required"
-			if len(fieldSpec.ErrorMessage) > 0 {
-				errorMsg = fieldSpec.ErrorMessage
-			}
-
-			errs.Add([]string{fieldSpec.Form}, RequiredError, errorMsg)
-		}
-		if fieldSpec.Required {
-			switch t := fieldPointer.(type) {
-			case *uint8:
-				if *t == 0 {
-					addRequiredError()
-				}
-			case **uint8:
-				if *t == nil {
-					addRequiredError()
-				}
-			case *[]uint8:
-				if len(*t) == 0 {
-					addRequiredError()
-				}
-			case *uint16:
-				if *t == 0 {
-					addRequiredError()
-				}
-			case **uint16:
-				if *t == nil {
-					addRequiredError()
-				}
-			case *[]uint16:
-				if len(*t) == 0 {
-					addRequiredError()
-				}
-			case *uint32:
-				if *t == 0 {
-					addRequiredError()
-				}
-			case **uint32:
-				if *t == nil {
-					addRequiredError()
-				}
-			case *[]uint32:
-				if len(*t) == 0 {
-					addRequiredError()
-				}
-			case *uint64:
-				if *t == 0 {
-					addRequiredError()
-				}
-			case **uint64:
-				if *t == nil {
-					addRequiredError()
-				}
-			case *[]uint64:
-				if len(*t) == 0 {
-					addRequiredError()
-				}
-			case *int8:
-				if *t == 0 {
-					addRequiredError()
-				}
-			case **int8:
-				if *t == nil {
-					addRequiredError()
-				}
-			case *[]int8:
-				if len(*t) == 0 {
-					addRequiredError()
-				}
-			case *int16:
-				if *t == 0 {
-					addRequiredError()
-				}
-			case **int16:
-				if *t == nil {
-					addRequiredError()
-				}
-			case *[]int16:
-				if len(*t) == 0 {
-					addRequiredError()
-				}
-			case *int32:
-				if *t == 0 {
-					addRequiredError()
-				}
-			case **int32:
-				if *t == nil {
-					addRequiredError()
-				}
-			case *[]int32:
-				if len(*t) == 0 {
-					addRequiredError()
-				}
-			case *int64:
-				if *t == 0 {
-					addRequiredError()
-				}
-			case **int64:
-				if *t == nil {
-					addRequiredError()
-				}
-			case *[]int64:
-				if len(*t) == 0 {
-					addRequiredError()
-				}
-			case *float32:
-				if *t == 0 {
-					addRequiredError()
-				}
-			case **float32:
-				if *t == nil {
-					addRequiredError()
-				}
-			case *[]float32:
-				if len(*t) == 0 {
-					addRequiredError()
-				}
-			case *float64:
-				if *t == 0 {
-					addRequiredError()
-				}
-			case **float64:
-				if *t == nil {
-					addRequiredError()
-				}
-			case *[]float64:
-				if len(*t) == 0 {
-					addRequiredError()
-				}
-			case *uint:
-				if *t == 0 {
-					addRequiredError()
-				}
-			case **uint:
-				if *t == nil {
-					addRequiredError()
-				}
-			case *[]uint:
-				if len(*t) == 0 {
-					addRequiredError()
-				}
-			case *int:
-				if *t == 0 {
-					addRequiredError()
-				}
-			case **int:
-				if *t == nil {
-					addRequiredError()
-				}
-			case *[]int:
-				if len(*t) == 0 {
-					addRequiredError()
-				}
-			case *bool:
-				if *t == false {
-					addRequiredError()
-				}
-			case **bool:
-				if *t == nil {
-					addRequiredError()
-				}
-			case *[]bool:
-				if len(*t) == 0 {
-					addRequiredError()
-				}
-			case *string:
-				if *t == "" {
-					addRequiredError()
-				}
-			case **string:
-				if *t == nil {
-					addRequiredError()
-				}
-			case *[]string:
-				if len(*t) == 0 {
-					addRequiredError()
-				}
-			case *time.Time:
-				if t.IsZero() {
-					addRequiredError()
-				}
-			case **time.Time:
-				if *t == nil {
-					addRequiredError()
-				}
-			case *[]time.Time:
-				if len(*t) == 0 {
-					addRequiredError()
-				}
-			case **multipart.FileHeader:
-				if *t == nil {
-					addRequiredError()
-				}
-			}
-		}
-	}
-
-	if validator, ok := userStruct.(Validator); ok {
-		err := validator.Validate(req)
-		if err != nil {
-			switch e := err.(type) {
-			case Error:
-				errs = append(errs, e)
-			case Errors:
-				errs = append(errs, e...)
-			default:
-				errs.Add([]string{}, "", e.Error())
-			}
-		}
-	}
-
-	if len(errs) > 0 {
-		return errs
-	}
-
 	return nil
 }
 
 func bindForm(req *http.Request, userStruct FieldMapper, formData map[string][]string,
 	formFile map[string][]*multipart.FileHeader) Errors {
+
+	// fmt.Printf("formData: %+v\n", formData)
 
 	var errs Errors
 
@@ -743,16 +499,14 @@ func bindForm(req *http.Request, userStruct FieldMapper, formData map[string][]s
 
 		case *[]*multipart.FileHeader:
 			if files, ok := formFile[fieldSpec.Form]; ok {
-				for _, file := range files {
-					*t = append(*t, file)
-				}
+				*t = append(*t, files...)
 			}
 		default:
 			errorHandler(errors.New("Field type is unsupported by the application"))
 		}
 	}
 
-	return validate(errs, req, userStruct)
+	return errs
 }
 
 func fieldSpecification(fieldNameOrSpec interface{}) (Field, error) {
@@ -790,11 +544,6 @@ type (
 		// Form is the form field name to bind from
 		Form string
 
-		// Required indicates whether the field is required. A required
-		// field that deserializes into the zero value for that type
-		// will generate an error.
-		Required bool
-
 		// TimeFormat specifies the time format for time.Time fields.
 		TimeFormat string
 
@@ -815,19 +564,6 @@ type (
 		// Bind populates the type with data in []string which comes from the
 		// HTTP request. The first argument is the field name.
 		Bind(string, []string) error
-	}
-
-	// Validator can be implemented by your type to handle some
-	// rudimentary request validation separately from your
-	// application logic.
-	Validator interface {
-		// Validate validates that the request is OK. It is recommended
-		// that validation be limited to checking values for syntax and
-		// semantics, enough to know that you can make sense of the request
-		// in your application. For example, you might verify that a credit
-		// card number matches a valid pattern, but you probably wouldn't
-		// perform an actual credit card authorization here.
-		Validate(*http.Request) error
 	}
 )
 
